@@ -219,9 +219,9 @@ options on the commandline with `-DOPTION=VALUE`, or use the "ccmake" gui.
   USE_SYSTEM_ZLIB=ON|OFF        (defaults to ON)
     If set to OFF, no attempt to detect ZLIB libraries will be done.
     Associated python extensions are: BINASCII, ZLIB
-    Following CMake variables can manually be set: ZLIB_LIBRARY, ZLIB_INCLUDE_DIR, ZLIB_ROOT
+    Following CMake variables can manually be set: ZLIB_LIBRARIES, ZLIB_INCLUDE_DIR, ZLIB_ROOT
     ZLIB_ROOT should be set only if USE_SYSTEM_ZLIB is ON
-    If [ZLIB_LIBRARY, ZLIB_INCLUDE_DIR] are found, extensions [BINASCII] will be built with ZLIB_CRC32
+    If [ZLIB_LIBRARIES, ZLIB_INCLUDE_DIR] are found, extensions [BINASCII] will be built with ZLIB_CRC32
 
   USE_SYSTEM_DB=ON|OFF          (defaults to ON)
     If set to OFF, no attempt to detect DB libraries will be done.
@@ -246,7 +246,7 @@ options on the commandline with `-DOPTION=VALUE`, or use the "ccmake" gui.
   USE_SYSTEM_SQLite3=ON|OFF     (defaults to ON)
     If set to OFF, no attempt to detect SQLite3 libraries will be done.
     Associated python extensions are: SQLITE3
-    Following CMake variables can manually be set: SQLite3_INCLUDE_DIR, SQLite3_LIBRARY
+    Following CMake variables can manually be set: SQLite_INCLUDE_DIR, SQLite_LIBRARY
 
   CMAKE_OSX_SDK                (MacOSX, default is autodetected, e.g 'macosx10.06')
     By default, the variable is automatically set running `xcrun` and/or `xcodebuild`. Note that its

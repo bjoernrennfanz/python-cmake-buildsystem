@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 3.13.5)
 
+# Add paths to check for cmake conan modules.
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/conan")
+
+include(SetupCompiler)
+
 set(PYTHON_VERSION "3.9.17" CACHE STRING "The version of Python to build.")
 
 string(REPLACE "." ";" VERSION_LIST ${PYTHON_VERSION})
@@ -24,6 +29,9 @@ if(APPLE)
 endif()
 
 project(Python C ASM)
+
+# Setup conan
+include(SetupConan)
 
 if(NOT DEFINED CMAKE_MACOSX_RPATH)
   set(CMAKE_MACOSX_RPATH "")
@@ -361,6 +369,9 @@ endif()
 # Enable CXX language to support building of _distutils_findvs extension
 if(WIN32 AND IS_PY3)
   enable_language(CXX)
+  if(${CMAKE_SIZEOF_VOID_P} EQUAL 8)
+    enable_language(ASM_MASM)
+  endif()
 endif()
 
 # Options depending of the python version

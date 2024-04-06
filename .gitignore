@@ -41,3 +41,15 @@ Python-*/
 # Ignore Python source archives
 Python-*.tgz
 Python-*.zip
+
+# Build outputs CLion
+.idea
+*install*
+build
+cmake-build*
+*lastbuildstate
+docs_aux*
+
+# Visual Studio
+*.pro.user
+out

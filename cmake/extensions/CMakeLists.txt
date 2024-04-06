@@ -642,10 +642,10 @@ set(binascii_REQUIRES "")
 set(binascii_DEFINITIONS "")
 set(binascii_LIBRARIES "")
 set(binascii_INCLUDEDIRS "")
-if(ZLIB_LIBRARY)
+if(ZLIB_LIBRARIES)
   list(APPEND binascii_REQUIRES ZLIB_INCLUDE_DIR)
   list(APPEND binascii_DEFINITIONS USE_ZLIB_CRC32)
-  list(APPEND binascii_LIBRARIES ${ZLIB_LIBRARY})
+  list(APPEND binascii_LIBRARIES ${ZLIB_LIBRARIES})
   list(APPEND binascii_INCLUDEDIRS ${ZLIB_INCLUDE_DIR})
 endif()
 add_python_extension(binascii
@@ -665,10 +665,10 @@ add_python_extension(_bsddb
 set(bz2_2_NAME bz2)
 set(bz2_3_NAME _bz2)
 add_python_extension(${bz2_${PY_VERSION_MAJOR}_NAME}
-    REQUIRES BZIP2_LIBRARIES BZIP2_INCLUDE_DIR
+    REQUIRES BZip2_LIBRARIES BZip2_INCLUDE_DIR
     SOURCES ${bz2_${PY_VERSION_MAJOR}_NAME}module.c
-    LIBRARIES ${BZIP2_LIBRARIES}
-    INCLUDEDIRS ${BZIP2_INCLUDE_DIR}
+    LIBRARIES ${BZip2_LIBRARIES}
+    INCLUDEDIRS ${BZip2_INCLUDE_DIR}
 )
 set(curses_common_REQUIRES CURSES_LIBRARIES)
 set(curses_common_LIBRARIES ${CURSES_LIBRARIES})
@@ -742,7 +742,7 @@ add_python_extension(readline
     INCLUDEDIRS ${READLINE_INCLUDE_PATH}
 )
 add_python_extension(_sqlite3
-    REQUIRES SQLite3_INCLUDE_DIRS SQLite3_LIBRARIES
+    REQUIRES SQLite_INCLUDE_DIRS SQLite_LIBRARIES
     SOURCES _sqlite/cache.c
             _sqlite/connection.c
             _sqlite/cursor.c
@@ -753,8 +753,8 @@ add_python_extension(_sqlite3
             _sqlite/statement.c
             _sqlite/util.c
     DEFINITIONS MODULE_NAME="sqlite3" SQLITE_OMIT_LOAD_EXTENSION=1
-    INCLUDEDIRS ${SQLite3_INCLUDE_DIRS}
-    LIBRARIES ${SQLite3_LIBRARIES}
+    INCLUDEDIRS ${SQLite_INCLUDE_DIRS}
+    LIBRARIES ${SQLite_LIBRARIES}
 )
 if(ENABLE_SQLITE3 AND CMAKE_C_COMPILER_ID MATCHES GNU)
     set_property(SOURCE ${SRC_DIR}/Modules/_sqlite/module.c PROPERTY COMPILE_FLAGS -Wno-deprecated-declarations)
@@ -765,7 +765,7 @@ if(WIN32)
 endif()
 set(_ssl_SOURCES _ssl.c)
 if(WIN32)
-    list(APPEND _ssl_SOURCES ${OPENSSL_INCLUDE_DIR}/openssl/applink.c)
+    list(APPEND _ssl_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/include/openssl/applink.c)
 endif()
 add_python_extension(_ssl
     REQUIRES OPENSSL_INCLUDE_DIR OPENSSL_LIBRARIES
@@ -773,9 +773,9 @@ add_python_extension(_ssl
     LIBRARIES ${_ssl_LIBRARIES}
     INCLUDEDIRS ${OPENSSL_INCLUDE_DIR}
 )
-set(_tkinter_REQUIRES TCL_LIBRARY TK_LIBRARY TCL_INCLUDE_PATH TK_INCLUDE_PATH)
-set(_tkinter_LIBRARIES ${TCL_LIBRARY} ${TK_LIBRARY})
-set(_tkinter_INCLUDEDIRS ${TCL_INCLUDE_PATH} ${TK_INCLUDE_PATH})
+set(_tkinter_REQUIRES TCL_LIBRARIES tk_LIBRARIES TCL_INCLUDE_DIR tk_INCLUDE_DIR)
+set(_tkinter_LIBRARIES ${TCL_LIBRARIES} ${tk_LIBRARIES})
+set(_tkinter_INCLUDEDIRS ${TCL_INCLUDE_DIR} ${tk_INCLUDE_DIR})
 if(UNIX)
   list(APPEND _tkinter_REQUIRES X11_INCLUDE_DIR X11_LIBRARIES)
   list(APPEND _tkinter_LIBRARIES ${X11_LIBRARIES})
@@ -790,9 +790,9 @@ add_python_extension(_tkinter
 )
 if(NOT USE_BUILTIN_ZLIB)
     add_python_extension(zlib
-        REQUIRES ZLIB_LIBRARY ZLIB_INCLUDE_DIR
+        REQUIRES ZLIB_LIBRARIES ZLIB_INCLUDE_DIR
         SOURCES zlibmodule.c
-        LIBRARIES ${ZLIB_LIBRARY}
+        LIBRARIES ${ZLIB_LIBRARIES}
         INCLUDEDIRS ${ZLIB_INCLUDE_DIR}
     )
 else()

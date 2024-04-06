@@ -311,10 +311,6 @@ if(UNIX)
     list(APPEND PYTHON_COMMON_SOURCES
         ${SRC_DIR}/Python/frozenmain.c
     )
-else()
-    list(APPEND PYTHON_COMMON_SOURCES
-        ${SRC_DIR}/Python/frozen.c
-    )
 endif()
 
 if(UNIX OR MINGW)
@@ -457,14 +453,23 @@ endif()
 set(LIBPYTHON_FROZEN_SOURCES )
 if(IS_PY3)
 
+# Windows needs PyImport_FrozenModules declared...
+if(WIN32)
+  set(FROZENMODULES_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/frozenmodules.c)
+endif()
+
 # Build _freeze_importlib executable
 add_executable(_freeze_importlib
   ${SRC_DIR}/Programs/_freeze_importlib.c
   ${LIBPYTHON_OMIT_FROZEN_SOURCES}
-  )
+  ${FROZENMODULES_SOURCE}
+)
 target_link_libraries(_freeze_importlib ${LIBPYTHON_TARGET_LIBRARIES})
 if(builtin_compile_definitions_without_py_limited_api)
   target_compile_definitions(_freeze_importlib PUBLIC ${builtin_compile_definitions_without_py_limited_api})
+endif()
+if(NOT BUILD_LIBPYTHON_SHARED)
+  target_compile_definitions(_freeze_importlib PUBLIC Py_NO_ENABLE_SHARED)
 endif()
 
 # Freeze modules
@@ -542,12 +547,8 @@ endif()
 set(LIBPYTHON_SOURCES
     ${LIBPYTHON_OMIT_FROZEN_SOURCES}
     ${LIBPYTHON_FROZEN_SOURCES}
+    ${SRC_DIR}/Python/frozen.c
 )
-if(UNIX)
-    list(APPEND LIBPYTHON_SOURCES
-        ${SRC_DIR}/Python/frozen.c
-    )
-endif()
 
 # Build python libraries
 function(add_libpython name type install component)
