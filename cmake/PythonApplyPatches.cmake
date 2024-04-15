@@ -7,7 +7,7 @@ set(CMAKE_MODULE_PATH
 if(NOT DEFINED PATCH_COMMAND)
   find_package(Git)
   if(Git_FOUND OR GIT_FOUND)
-    set(PATCH_COMMAND ${GIT_EXECUTABLE} apply --whitespace=fix)
+    set(PATCH_COMMAND ${GIT_EXECUTABLE} apply --whitespace=fix --ignore-whitespace)
     # Initialize Git repo to ensure "git apply" works when source tree
     # is located within an already versioned tree.
     if(NOT EXISTS "${SRC_DIR}/.git")

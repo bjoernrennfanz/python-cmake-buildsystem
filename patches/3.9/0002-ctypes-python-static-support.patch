@@ -1,5 +1,5 @@
---- a/Lib/ctypes/__init__.py 2023-06-06 11:32:53.000000000 +0200
-+++ b/Lib/ctypes/__init__.py 2024-04-14 23:32:33.868710000 +0200
+--- "a/Lib/ctypes/__init__.py" 2023-06-06 11:32:53.000000000 +0200
++++ "b/Lib/ctypes/__init__.py" 2024-04-14 23:32:33.868710000 +0200
 @@ -456,13 +456,15 @@
  cdll = LibraryLoader(CDLL)
  pydll = LibraryLoader(PyDLL)
