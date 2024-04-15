@@ -1,0 +1,22 @@
+--- a/Lib/ctypes/__init__.py 2023-06-06 11:32:53.000000000 +0200
++++ b/Lib/ctypes/__init__.py 2024-04-14 23:32:33.868710000 +0200
+@@ -456,13 +456,15 @@
+ cdll = LibraryLoader(CDLL)
+ pydll = LibraryLoader(PyDLL)
+ 
+-if _os.name == "nt":
++if _os.name == "nt" and hasattr(_sys, "dllhandle"):
+     pythonapi = PyDLL("python dll", None, _sys.dllhandle)
+ elif _sys.platform == "cygwin":
+     pythonapi = PyDLL("libpython%d.%d.dll" % _sys.version_info[:2])
+ else:
+-    pythonapi = PyDLL(None)
+-
++    if _os.name == "nt":
++        pythonapi = PyDLL("python static", None, -1)
++    else:
++        pythonapi = PyDLL(None)
+ 
+ if _os.name == "nt":
+     windll = LibraryLoader(WinDLL)
+ 
