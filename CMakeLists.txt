@@ -6,6 +6,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/conan")
 include(SetupCompiler)
 
 set(PYTHON_VERSION "3.9.17" CACHE STRING "The version of Python to build.")
+set(NUMPY_VERSION "1.26.4" CACHE STRING "The version of numpy to build.")
 
 string(REPLACE "." ";" VERSION_LIST ${PYTHON_VERSION})
 list(GET VERSION_LIST 0 PY_VERSION_MAJOR)
@@ -28,7 +29,12 @@ if(APPLE)
   message(STATUS "${_msg} - ${MACOSX_DEPLOYMENT_TARGET}")
 endif()
 
-project(Python C ASM)
+# Force C++ 17 standard, no fallback, don´t use compiler extensions
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+project(Python C CXX ASM)
 
 # Setup conan
 include(SetupConan)
@@ -71,6 +77,7 @@ endif()
 
 option(BUILD_LIBPYTHON_SHARED ${_build_libpython_shared_desc} ${_build_libpython_shared_default})
 option(BUILD_EXTENSIONS_AS_BUILTIN "Default all modules as builtin to libpython" OFF)
+option(BUILD_NUMPY_EXTENSION_AS_BUILTIN "Build numpy module as builtin extension" ON)
 option(USE_LIB64 "Search for dependencies and install to prefix/lib64 instead of prefix/lib" OFF)
 if(WIN32)
   option(INSTALL_WINDOWS_TRADITIONAL "Install the executable and extensions in the traditional location" OFF)
@@ -357,6 +364,9 @@ option(PYTHON_APPLY_PATCHES "Apply patches" ON)
 if(PYTHON_APPLY_PATCHES)
   include(cmake/PythonApplyPatches.cmake)
 endif()
+
+# Setup NumPy extension
+include(cmake/SetupNumPyExtension.cmake)
 
 # Convenience boolean variables to easily test python version
 set(IS_PY3 0)

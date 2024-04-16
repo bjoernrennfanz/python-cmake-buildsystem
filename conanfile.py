@@ -14,12 +14,14 @@ class CPythonOpenCVConan(ConanFile):
     options = {
         "shared": [True, False],
         "with_extensions_as_builtin": [True, False],
-        "with_documentation": [True, False]
+        "with_documentation": [True, False],
+        "with_gdbm": [True, False]
     }
     default_options = {
         "shared": False,
         "with_extensions_as_builtin": True,
-        "with_documentation": False
+        "with_documentation": False,
+        "with_gdbm": False
     }
 
     def generate(self):
@@ -28,6 +30,10 @@ class CPythonOpenCVConan(ConanFile):
         tc.variables["INSTALL_MANUAL"] = self.options.with_documentation
         tc.variables["BUILD_EXTENSIONS_AS_BUILTIN"] = self.options.with_extensions_as_builtin
         tc.variables["BUILD_WININST"] = False
+
+        # Enable extensions
+        tc.variables["ENABLE_GDBM"] = self.options.with_gdbm
+
         tc.generate()
 
     def requirements(self):
@@ -40,3 +46,5 @@ class CPythonOpenCVConan(ConanFile):
         self.requires("tcl/8.6.10")
         self.requires("tk/8.6.10")
         self.requires("sqlite3/3.36.0")
+        if self.options.with_gdbm:
+            self.requires("gdbm/1.19")
