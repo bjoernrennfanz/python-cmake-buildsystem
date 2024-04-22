@@ -74,3 +74,61 @@ message(STATUS "NUMPY_VERSION: ${NUMPY_VERSION}")
 if(NOT DEFINED _download_numpy_${NUMPY_VERSION}_md5)
   message(WARNING "warning: selected numpy version '${NUMPY_VERSION}' is not tested. Tested versions `1.26.[1-4]`")
 endif()
+
+# We need an external python to build
+if (DEFINED ENV{USEPYTHONVERSION_PYTHONLOCATION})
+  # Find python used by Azure DevOps CI
+  find_program(Python3_EXECUTABLE
+    NAMES
+      python3 python
+    HINTS
+      $ENV{USEPYTHONVERSION_PYTHONLOCATION}/bin
+      $ENV{USEPYTHONVERSION_PYTHONLOCATION}
+  )
+else()
+  find_package(Python3 COMPONENTS Interpreter)
+endif()
+
+# Generate source file for numpy builds
+function(numpy_generate_src GENERATED_SRC_FILES)
+  foreach(_current_file ${ARGN})
+    get_filename_component(_abs_file ${_current_file} ABSOLUTE)
+    get_filename_component(_generated_file ${_abs_file} NAME_WE)
+    get_filename_component(_generated_file_last_ext ${_abs_file} LAST_EXT)
+    get_filename_component(_generated_file_ext ${_abs_file} EXT)
+    string(REPLACE "${_generated_file_last_ext}" "" _generated_file_ext "${_generated_file_ext}")
+    get_source_file_property(output_location ${_abs_file} OUTPUT_LOCATION)
+    if(output_location)
+      file(MAKE_DIRECTORY "${output_location}")
+      set(_generated_file "${output_location}/${_generated_file}${_generated_file_ext}")
+    else()
+      set(_generated_file "${CMAKE_BINARY_DIR}/generated/numpy/${_generated_file}${_generated_file_ext}")
+    endif()   
+    add_custom_command(OUTPUT ${_generated_file}
+      COMMAND "${Python3_EXECUTABLE}"
+      ARGS ${NUMPY_SRC_DIR}/numpy/_build_utils/process_src_template.py ${_abs_file} -o ${_generated_file}
+      DEPENDS ${_abs_file} VERBATIM
+    )
+    list(APPEND _generated_files ${_generated_file})
+  endforeach()
+  set(${GENERATED_SRC_FILES} ${_generated_files} PARENT_SCOPE)
+endfunction()
+
+# Build npymath static library
+numpy_generate_src(numpy_npymath_sources
+  ${NUMPY_SRC_DIR}/numpy/core/src/npymath/npy_math_internal.h.src
+  ${NUMPY_SRC_DIR}/numpy/core/src/npymath/ieee754.c.src
+  ${NUMPY_SRC_DIR}/numpy/core/src/npymath/npy_math_complex.c.src
+)
+add_library(npymath STATIC 
+  ${numpy_npymath_sources}
+  ${NUMPY_SRC_DIR}/numpy/core/src/npymath/halffloat.cpp
+  ${NUMPY_SRC_DIR}/numpy/core/src/npymath/npy_math.c
+)
+target_include_directories(npymath 
+  PUBLIC
+    ${CMAKE_BINARY_DIR}/generated/numpy
+    ${NUMPY_SRC_DIR}/numpy/core/include
+    ${NUMPY_SRC_DIR}/numpy/core/src/npymath
+    ${NUMPY_SRC_DIR}/numpy/core/src/common
+)
