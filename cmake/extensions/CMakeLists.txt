@@ -819,3 +819,7 @@ if(USE_LIBEDIT AND ENABLE_READLINE AND NOT BUILTIN_READLINE)
     set_target_properties(extension_readline PROPERTIES
         COMPILE_DEFINITIONS "USE_LIBEDIT")
 endif()
+
+if(NUMPY_SRC_DIR)
+    add_subdirectory(numpy)
+endif()

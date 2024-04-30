@@ -15,11 +15,14 @@ endif()
 # Download numpy sources
 set(_download_numpy_link "https://github.com/numpy/numpy/releases/download/v${NUMPY_VERSION}/numpy-${NUMPY_VERSION}.tar.gz")
 
-# numpy 1.26.x
+# Set numpy 1.26.x md5 checksums
 set(_download_numpy_1.26.4_md5 "19550cbe7bedd96a928da9d4ad69509d")
 set(_download_numpy_1.26.3_md5 "1c915dc6c36dd4c674d9379e9470ff8b")
 set(_download_numpy_1.26.2_md5 "8f6446a32e47953a03f8fe8533e21e98")
 set(_download_numpy_1.26.1_md5 "2d770f4c281d405b690c4bcb3dbe99e2")
+
+# Set wanted c api versions
+set(_numpy_1.26_c_api_version "11")
 
 set(_extracted_numpy_dir "numpy-${NUMPY_VERSION}")
 
@@ -31,7 +34,7 @@ if(NOT EXISTS ${NUMPY_SRC_DIR}/${_landmark_numpy} AND DOWNLOAD_SOURCES)
     else()
       message(STATUS "Downloading ${_download_numpy_link}")
       if(NOT DEFINED _download_numpy_${NUMPY_VERSION}_md5)
-        message(FATAL_ERROR "Selected PY_VERSION [${PY_VERSION}] is not associated with any checksum. Consider updating this CMakeLists.txt setting _download_${PY_VERSION}_md5 variable")
+        message(FATAL_ERROR "Selected NUMPY_VERSION [${NUMPY_VERSION}] is not associated with any checksum. Consider updating this CMakeLists.txt setting _download_numpy_${NUMPY_VERSION}_md5 variable")
       endif()
       file(
         DOWNLOAD ${_download_numpy_link} ${_numpy_archive_filepath}
@@ -67,8 +70,33 @@ You could try to:
 If you already downloaded the source, you could try to re-configure this project passing -DNUMPY_SRC_DIR:PATH=/path/to/numpy-{NUMPY_VERSION} using cmake or adding an PATH entry named NUMPY_SRC_DIR from cmake-gui.")
 endif()
 
+# Split version into major, minor and patch versions
+string(REPLACE "." ";" NUMPY_VERSION_SPLIT ${NUMPY_VERSION})
+list(LENGTH NUMPY_VERSION_SPLIT NUMPY_VERSION_COUNT)
+if(NUMPY_VERSION_COUNT GREATER_EQUAL 3)
+  list(GET NUMPY_VERSION_SPLIT 2 NUMPY_VERSION_PATCH)
+else()
+  set(NUMPY_VERSION_PATCH 0)
+endif()
+if(NUMPY_VERSION_COUNT GREATER_EQUAL 2)
+  list(GET NUMPY_VERSION_SPLIT 1 NUMPY_VERSION_MINOR)
+else()
+  set(NUMPY_VERSION_MINOR 0)
+endif()
+if(NUMPY_VERSION_COUNT GREATER_EQUAL 1)
+  list(GET NUMPY_VERSION_SPLIT 0 NUMPY_VERSION_MAJOR)
+else()
+  set(NUMPY_VERSION_MAJOR 0)
+endif()
+
+if(NOT DEFINED _numpy_${NUMPY_VERSION_MAJOR}.${NUMPY_VERSION_MINOR}_c_api_version)
+  message(FATAL_ERROR "Selected NUMPY_VERSION [${NUMPY_VERSION}] is not associated with any c api version. Consider updating this CMakeLists.txt setting _numpy_${NUMPY_VERSION_MAJOR}.${NUMPY_VERSION_MINOR}_c_api_version variable")
+endif()
+set(NUMPY_C_API_VERSION "${_numpy_${NUMPY_VERSION_MAJOR}.${NUMPY_VERSION_MINOR}_c_api_version}")
+
 message(STATUS "NUMPY_SRC_DIR: ${NUMPY_SRC_DIR}")
 message(STATUS "NUMPY_VERSION: ${NUMPY_VERSION}")
+message(STATUS "NUMPY_C_API_VERSION: ${NUMPY_C_API_VERSION}")
 
 # Check numpy version
 if(NOT DEFINED _download_numpy_${NUMPY_VERSION}_md5)
@@ -103,32 +131,84 @@ function(numpy_generate_src GENERATED_SRC_FILES)
       set(_generated_file "${output_location}/${_generated_file}${_generated_file_ext}")
     else()
       set(_generated_file "${CMAKE_BINARY_DIR}/generated/numpy/${_generated_file}${_generated_file_ext}")
-    endif()   
-    add_custom_command(OUTPUT ${_generated_file}
-      COMMAND "${Python3_EXECUTABLE}"
-      ARGS ${NUMPY_SRC_DIR}/numpy/_build_utils/process_src_template.py ${_abs_file} -o ${_generated_file}
-      DEPENDS ${_abs_file} VERBATIM
-    )
+    endif()
+    if(BUILD_LIBPYTHON_SHARED)
+      add_custom_command(OUTPUT ${_generated_file}
+        COMMAND "${Python3_EXECUTABLE}"
+        ARGS ${NUMPY_SRC_DIR}/numpy/_build_utils/process_src_template.py ${_abs_file} -o ${_generated_file}
+        DEPENDS ${_abs_file} VERBATIM
+      )
+    else()
+      file(RELATIVE_PATH _generated_file_rel ${CMAKE_BINARY_DIR} ${_generated_file})
+      message(STATUS "NumPy: Generate ${_generated_file_rel}")
+      execute_process(
+        COMMAND ${Python3_EXECUTABLE} ${NUMPY_SRC_DIR}/numpy/_build_utils/process_src_template.py ${_abs_file} -o ${_generated_file}
+        RESULT_VARIABLE _numpy_generate_src_result
+      )
+      if (_numpy_generate_src_result)
+        message(ERROR "process_src_template.py failed with output: ${_numpy_generate_src_result}")
+      endif()
+    endif()
     list(APPEND _generated_files ${_generated_file})
   endforeach()
   set(${GENERATED_SRC_FILES} ${_generated_files} PARENT_SCOPE)
 endfunction()
 
-# Build npymath static library
-numpy_generate_src(numpy_npymath_sources
-  ${NUMPY_SRC_DIR}/numpy/core/src/npymath/npy_math_internal.h.src
-  ${NUMPY_SRC_DIR}/numpy/core/src/npymath/ieee754.c.src
-  ${NUMPY_SRC_DIR}/numpy/core/src/npymath/npy_math_complex.c.src
-)
-add_library(npymath STATIC 
-  ${numpy_npymath_sources}
-  ${NUMPY_SRC_DIR}/numpy/core/src/npymath/halffloat.cpp
-  ${NUMPY_SRC_DIR}/numpy/core/src/npymath/npy_math.c
-)
-target_include_directories(npymath 
-  PUBLIC
-    ${CMAKE_BINARY_DIR}/generated/numpy
-    ${NUMPY_SRC_DIR}/numpy/core/include
-    ${NUMPY_SRC_DIR}/numpy/core/src/npymath
-    ${NUMPY_SRC_DIR}/numpy/core/src/common
-)
+function(numpy_generate_using_script GENERATED_SRC_FILES)
+  set(options)
+  set(oneValueArgs SCRIPT OUTPUT_DIR)
+  set(multiValueArgs OUTPUT EXTRA_ARGS)
+  cmake_parse_arguments(NUMPY_GENERATE_SCRIPT
+    "${options}"
+    "${oneValueArgs}"
+    "${multiValueArgs}"
+    ${ARGN}
+  )
+
+  # Check for unparsed arguments (unknown)
+  if(NUMPY_GENERATE_SCRIPT_UNPARSED_ARGUMENTS)
+    message(FATAL_ERROR "numpy_generate_using_script had unparsed arguments")
+  endif()
+
+  # Build output filenames
+  foreach(_current_file ${NUMPY_GENERATE_SCRIPT_OUTPUT})
+    if(NUMPY_GENERATE_SCRIPT_OUTPUT_DIR)
+      file(MAKE_DIRECTORY "${NUMPY_GENERATE_SCRIPT_OUTPUT_DIR}")
+      set(_generated_file "${NUMPY_GENERATE_SCRIPT_OUTPUT_DIR}/${_current_file}")
+    else()
+      set(_generated_file "${CMAKE_BINARY_DIR}/generated/numpy/${_current_file}")
+    endif()
+    list(APPEND _generated_files ${_generated_file})
+  endforeach()
+
+  # Find output directory and generation mode
+  list(LENGTH NUMPY_GENERATE_SCRIPT_OUTPUT NUMPY_GENERATE_SCRIPT_OUTPUT_COUNT)
+  set(_generated_output "${_generated_file}")
+  if(NUMPY_GENERATE_SCRIPT_OUTPUT_COUNT GREATER 1)
+    get_filename_component(_generated_file_dir ${_generated_file} DIRECTORY)
+    set(_generated_output "${_generated_file_dir}")
+  endif()
+
+  if(BUILD_LIBPYTHON_SHARED)
+    add_custom_command(OUTPUT ${_generated_files}
+      COMMAND "${Python3_EXECUTABLE}"
+      ARGS ${NUMPY_GENERATE_SCRIPT_SCRIPT} -o ${_generated_output} ${NUMPY_GENERATE_SCRIPT_EXTRA_ARGS}
+      VERBATIM
+    )
+  else()
+    foreach(_generated_file ${_generated_files})
+      file(RELATIVE_PATH _generated_file_rel ${CMAKE_BINARY_DIR} ${_generated_file})
+      message(STATUS "NumPy: Generate ${_generated_file_rel}")
+    endforeach()
+    execute_process(
+      COMMAND ${Python3_EXECUTABLE} ${NUMPY_GENERATE_SCRIPT_SCRIPT} -o ${_generated_output} ${NUMPY_GENERATE_SCRIPT_EXTRA_ARGS}
+      RESULT_VARIABLE _numpy_generate_src_result
+    )
+    if (_numpy_generate_src_result)
+      get_filename_component(_numpy_generate_script ${NUMPY_GENERATE_SCRIPT_SCRIPT} NAME)
+      message(ERROR "${_numpy_generate_script} failed with output: ${_numpy_generate_src_result}")
+    endif()
+  endif()
+
+  set(${GENERATED_SRC_FILES} ${_generated_files} PARENT_SCOPE)
+endfunction()

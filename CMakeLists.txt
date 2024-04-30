@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.13.5)
+ï»¿cmake_minimum_required(VERSION 3.13.5)
 
 # Add paths to check for cmake conan modules.
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/conan")
@@ -29,7 +29,7 @@ if(APPLE)
   message(STATUS "${_msg} - ${MACOSX_DEPLOYMENT_TARGET}")
 endif()
 
-# Force C++ 17 standard, no fallback, don´t use compiler extensions
+# Force C++ 17 standard, no fallback, donï¿½t use compiler extensions
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -560,10 +560,12 @@ if(CMAKE_C_COMPILER_ID MATCHES GNU)
     append_if_absent(CMAKE_C_FLAGS "-Wall")
     append_if_absent(CMAKE_C_FLAGS "-Wstrict-prototypes")
     append_if_absent(CMAKE_C_FLAGS "-fno-strict-aliasing")
+    append_if_absent(CMAKE_C_FLAGS "-Wno-macro-redefined")
     append_if_absent(CMAKE_C_FLAGS "-fwrapv")
     append_if_absent(CMAKE_C_FLAGS "-g")
 elseif(CMAKE_C_COMPILER_ID MATCHES Clang)
     append_if_absent(CMAKE_C_FLAGS "-Wall")
+    append_if_absent(CMAKE_C_FLAGS "-Wno-macro-redefined")
     append_if_absent(CMAKE_C_FLAGS "-g")
 elseif(CMAKE_C_COMPILER_ID MATCHES Intel)
     append_if_absent(CMAKE_C_FLAGS "-Wall")

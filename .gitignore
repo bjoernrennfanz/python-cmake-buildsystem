@@ -53,3 +53,9 @@ docs_aux*
 # Visual Studio
 *.pro.user
 out
+
+# Ignore NumPy source directories
+numpy-*/
+
+# Ignore NumPy source archives
+numpy-*.tar.gz

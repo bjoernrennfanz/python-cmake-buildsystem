@@ -1,0 +1,117 @@
+#cmakedefine SIZEOF_PY_INTPTR_T @SIZEOF_PY_INTPTR_T@
+#cmakedefine SIZEOF_OFF_T @SIZEOF_OFF_T@
+#cmakedefine SIZEOF_PY_LONG_LONG @SIZEOF_PY_LONG_LONG@
+
+#cmakedefine HAVE_BACKTRACE
+#cmakedefine HAVE_MADVISE
+#cmakedefine HAVE_FTELLO
+#cmakedefine HAVE_FSEEKO
+#cmakedefine HAVE_FALLOCATE
+#cmakedefine HAVE_STRTOLD_L
+#cmakedefine HAVE__THREAD
+#cmakedefine HAVE___DECLSPEC_THREAD_
+
+/* Optional headers */
+#cmakedefine HAVE_FEATURES_H
+#cmakedefine HAVE_XLOCALE_H
+#cmakedefine HAVE_DLFCN_H
+#cmakedefine HAVE_EXECINFO_H
+#cmakedefine HAVE_LIBUNWIND_H
+#cmakedefine HAVE_SYS_MMAN_H
+#cmakedefine HAVE_XMMINTRIN_H
+#cmakedefine HAVE_EMMINTRIN_H
+#cmakedefine HAVE_IMMINTRIN_H
+
+/* Optional intrinsics */
+#cmakedefine HAVE___BUILTIN_ISNAN
+#cmakedefine HAVE___BUILTIN_ISINF
+#cmakedefine HAVE___BUILTIN_ISFINITE
+#cmakedefine HAVE___BUILTIN_BSWAP32
+#cmakedefine HAVE___BUILTIN_BSWAP64
+#cmakedefine HAVE___BUILTIN_EXPECT
+#cmakedefine HAVE___BUILTIN_MUL_OVERFLOW
+#cmakedefine HAVE___BUILTIN_PREFETCH
+
+#cmakedefine HAVE_ATTRIBUTE_OPTIMIZE_UNROLL_LOOPS
+#cmakedefine HAVE_ATTRIBUTE_OPTIMIZE_OPT_3
+#cmakedefine HAVE_ATTRIBUTE_OPTIMIZE_OPT_2
+#cmakedefine HAVE_ATTRIBUTE_NONNULL
+
+/* C99 complex support and complex.h are not universal */
+#cmakedefine HAVE_COMPLEX_H
+#cmakedefine HAVE_CABS
+#cmakedefine HAVE_CACOS
+#cmakedefine HAVE_CACOSH
+#cmakedefine HAVE_CARG
+#cmakedefine HAVE_CASIN
+#cmakedefine HAVE_CASINH
+#cmakedefine HAVE_CATAN
+#cmakedefine HAVE_CATANH
+#cmakedefine HAVE_CEXP
+#cmakedefine HAVE_CLOG
+#cmakedefine HAVE_CPOW
+#cmakedefine HAVE_CSQRT
+#cmakedefine HAVE_CABSF
+#cmakedefine HAVE_CACOSF
+#cmakedefine HAVE_CACOSHF
+#cmakedefine HAVE_CARGF
+#cmakedefine HAVE_CASINF
+#cmakedefine HAVE_CASINHF
+#cmakedefine HAVE_CATANF
+#cmakedefine HAVE_CATANHF
+#cmakedefine HAVE_CEXPF
+#cmakedefine HAVE_CLOGF
+#cmakedefine HAVE_CPOWF
+#cmakedefine HAVE_CSQRTF
+#cmakedefine HAVE_CABSL
+#cmakedefine HAVE_CACOSL
+#cmakedefine HAVE_CACOSHL
+#cmakedefine HAVE_CARGL
+#cmakedefine HAVE_CASINL
+#cmakedefine HAVE_CASINHL
+#cmakedefine HAVE_CATANL
+#cmakedefine HAVE_CATANHL
+#cmakedefine HAVE_CEXPL
+#cmakedefine HAVE_CLOGL
+#cmakedefine HAVE_CPOWL
+#cmakedefine HAVE_CSQRTL
+/* FreeBSD */
+#cmakedefine HAVE_CSINF
+#cmakedefine HAVE_CSINHF
+#cmakedefine HAVE_CCOSF
+#cmakedefine HAVE_CCOSHF
+#cmakedefine HAVE_CTANF
+#cmakedefine HAVE_CTANHF
+#cmakedefine HAVE_CSIN
+#cmakedefine HAVE_CSINH
+#cmakedefine HAVE_CCOS
+#cmakedefine HAVE_CCOSH
+#cmakedefine HAVE_CTAN
+#cmakedefine HAVE_CTANH
+#cmakedefine HAVE_CSINL
+#cmakedefine HAVE_CSINHL
+#cmakedefine HAVE_CCOSL
+#cmakedefine HAVE_CCOSHL
+#cmakedefine HAVE_CTANL
+#cmakedefine HAVE_CTANHL
+
+#cmakedefine01 NPY_CAN_LINK_SVML
+#cmakedefine01 NPY_RELAXED_STRIDES_DEBUG
+
+#cmakedefine HAVE_LDOUBLE_INTEL_EXTENDED_16_BYTES_LE
+#cmakedefine HAVE_LDOUBLE_INTEL_EXTENDED_12_BYTES_LE
+#cmakedefine HAVE_LDOUBLE_MOTOROLA_EXTENDED_12_BYTES_BE
+#cmakedefine HAVE_LDOUBLE_IEEE_DOUBLE_LE
+#cmakedefine HAVE_LDOUBLE_IEEE_DOUBLE_BE
+#cmakedefine HAVE_LDOUBLE_IEEE_QUAD_LE
+#cmakedefine HAVE_LDOUBLE_IEEE_QUAD_BE
+#cmakedefine HAVE_LDOUBLE_IBM_DOUBLE_DOUBLE_LE
+#cmakedefine HAVE_LDOUBLE_IBM_DOUBLE_DOUBLE_BE
+
+#ifndef __cplusplus
+/* #undef inline */
+#endif
+
+#ifndef NUMPY_CORE_SRC_COMMON_NPY_CONFIG_H_
+#error config.h should never be included directly, include npy_config.h instead
+#endif
