@@ -194,3 +194,5 @@ string(TOLOWER ${CMAKE_HOST_SYSTEM_NAME} HOST_CPU_SYSTEM)
 configure_file(${NUMPY_SRC_DIR}/numpy/__config__.py.in ${PROJECT_BINARY_DIR}/${PYTHONHOME}/numpy/__config__.py @ONLY)
 
 add_subdirectory(core)
+add_subdirectory(fft)
+add_subdirectory(linalg)
