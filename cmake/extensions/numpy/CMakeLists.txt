@@ -1,8 +1,21 @@
-# Determine python type sizes
-set(CMAKE_EXTRA_INCLUDE_FILES Python.h)
-set(CMAKE_REQUIRED_INCLUDES "${SRC_DIR}/Include" "${CMAKE_BINARY_DIR}/bin")
-check_type_size("Py_intptr_t" NPY_SIZEOF_PY_INTPTR_T)
-check_type_size("PY_LONG_LONG" NPY_SIZEOF_PY_LONG_LONG)
+if(WIN32)
+  set(SIZEOF_SHORT 2)
+  set(SIZEOF_INT 4)
+  set(SIZEOF_LONG 4)
+  set(SIZEOF_LONG_LONG 8)
+  set(SIZEOF_DOUBLE 8)
+  set(SIZEOF_LONG_DOUBLE 8)
+  set(SIZEOF_FLOAT 4)
+  set(SIZEOF_OFF_T 4)
+  set(SIZEOF_PY_INTPTR_T 8)
+  set(SIZEOF_PY_LONG_LONG 8)
+else()
+  # Determine python type sizes
+  set(CMAKE_EXTRA_INCLUDE_FILES Python.h)
+  set(CMAKE_REQUIRED_INCLUDES "${SRC_DIR}/Include" "${CMAKE_BINARY_DIR}/bin")
+  check_type_size("Py_intptr_t" SIZEOF_PY_INTPTR_T)
+  check_type_size("PY_LONG_LONG" SIZEOF_PY_LONG_LONG)
+endif()
 
 # Determine complex types
 check_include_files(complex.h HAVE_COMPLEX_H)
@@ -28,6 +41,19 @@ if(HAVE_COMPLEX_H)
     check_type_size("struct {long double __x\; long double __y\;}" NPY_SIZEOF_COMPLEX_LONGDOUBLE)
   endif()
 endif()
+
+# Determine format of long double
+set(_numpy_longdouble_msg "Checking long double format")
+try_run(LONGDOUBLE_RUN LONGDOUBLE_COMPILE
+  ${PROJECT_BINARY_DIR} ${PROJECT_SOURCE_DIR}/cmake/extensions/numpy/longdoubleformat.c
+  RUN_OUTPUT_VARIABLE LONGDOUBLE_FORMAT
+)
+if(NOT LONGDOUBLE_COMPILE)
+  message(FATAL_ERROR "Unknown long double format of size: ${SIZEOF_LONG_DOUBLE}")
+endif()
+set(HAVE_LDOUBLE_${LONGDOUBLE_FORMAT} True)
+
+message(STATUS "${_numpy_longdouble_msg} - ${LONGDOUBLE_FORMAT}")
 
 # Looking for C99 complex functions
 set(_numpy_complex_funcs
@@ -59,7 +85,7 @@ set(NPY_API_VERSION "0x${NUMPY_C_API_VERSION}")
 if (HAVE_HIDDEN_VISIBILITY_ATTRIBUTE)
   set(NPY_VISIBILITY_HIDDEN "__attribute__((visibility(\"hidden\")))")
 else()
-  set(NPY_VISIBILITY_HIDDEN "")
+  set(NPY_VISIBILITY_HIDDEN " ")
 endif()
 
 # Detect other headers
@@ -81,9 +107,9 @@ set(NPY_SIZEOF_DOUBLE ${SIZEOF_DOUBLE})
 set(NPY_SIZEOF_COMPLEX_DOUBLE ${SIZEOF_COMPLEX_DOUBLE})
 set(NPY_SIZEOF_LONGDOUBLE ${SIZEOF_LONG_DOUBLE})
 set(NPY_SIZEOF_COMPLEX_LONGDOUBLE ${SIZEOF_COMPLEX_LONGDOUBLE})
-set(NPY_SIZEOF_PY_INTPTR_T ${NPY_SIZEOF_PY_INTPTR_T})
+set(NPY_SIZEOF_PY_INTPTR_T ${SIZEOF_PY_INTPTR_T})
 set(NPY_SIZEOF_OFF_T ${SIZEOF_OFF_T})
-set(NPY_SIZEOF_PY_LONG_LONG ${NPY_SIZEOF_PY_LONG_LONG})
+set(NPY_SIZEOF_PY_LONG_LONG ${SIZEOF_PY_LONG_LONG})
 set(NPY_SIZEOF_LONGLONG ${SIZEOF_LONG_LONG})
 
 # Generate config files
