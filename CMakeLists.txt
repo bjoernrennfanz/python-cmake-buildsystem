@@ -29,7 +29,8 @@ if(APPLE)
   message(STATUS "${_msg} - ${MACOSX_DEPLOYMENT_TARGET}")
 endif()
 
-# Force C++ 17 standard, no fallback, don�t use compiler extensions
+# Force C11 and C++ 17 standard, no fallback, don´t use compiler extensions
+set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -576,6 +577,7 @@ endif()
 
 if(MSVC)
     append_if_absent(CMAKE_C_FLAGS "/Zm200")
+    append_if_absent(CMAKE_CXX_FLAGS "/Zc:__cplusplus")
     string(REPLACE "/Ob2" "/Ob1" CMAKE_C_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE}) # InlineFunctionExpansion=1
     set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}" CACHE STRING "Flags used by the compiler during release builds" FORCE)
 endif()

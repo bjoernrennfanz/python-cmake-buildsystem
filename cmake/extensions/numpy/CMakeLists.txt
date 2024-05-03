@@ -17,6 +17,22 @@ else()
   check_type_size("PY_LONG_LONG" SIZEOF_PY_LONG_LONG)
 endif()
 
+# Enable UNIX large file support on 32-bit systems 
+# (64 bit off_t, lseek -> lseek64, etc.)
+set(_numpy_cflags_large_file_support
+  "_FILE_OFFSET_BITS=64"
+  "_LARGEFILE_SOURCE=1"
+  "_LARGEFILE64_SOURCE=1"
+)
+
+# Set common build flags for C and C++ code
+set(_numpy_c_args_common
+  HAVE_NPY_CONFIG_H
+  NPY_INTERNAL_BUILD
+  NPY_DISABLE_OPTIMIZATION
+  ${_numpy_cflags_large_file_support}
+)
+
 # Determine complex types
 check_include_files(complex.h HAVE_COMPLEX_H)
 if(HAVE_COMPLEX_H)

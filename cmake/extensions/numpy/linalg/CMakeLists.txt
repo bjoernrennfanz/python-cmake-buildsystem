@@ -24,9 +24,7 @@ add_python_extension(lapack_lite
     ${NUMPY_SRC_DIR}/numpy/core/include
     ${NUMPY_SRC_DIR}/numpy/core/src/common
   DEFINITIONS
-    HAVE_NPY_CONFIG_H
-    NPY_INTERNAL_BUILD
-    NPY_DISABLE_OPTIMIZATION
+    ${_numpy_c_args_common}
 )
 
 add_python_extension(_umath_linalg
@@ -40,9 +38,7 @@ add_python_extension(_umath_linalg
     ${NUMPY_SRC_DIR}/numpy/core/include
     ${NUMPY_SRC_DIR}/numpy/core/src/common
   DEFINITIONS
-    HAVE_NPY_CONFIG_H
-    NPY_INTERNAL_BUILD
-    NPY_DISABLE_OPTIMIZATION
+    ${_numpy_c_args_common}
 )
 
 # Install numpy linalg files

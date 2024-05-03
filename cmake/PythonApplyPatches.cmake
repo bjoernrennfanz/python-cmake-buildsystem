@@ -41,14 +41,14 @@ if(NOT DEFINED PATCH_COMMAND)
   message(FATAL_ERROR "Could NOT find a suitable version of Git or Patch executable to apply patches. ${_reason}")
 endif()
 
-set(patches_dir "${Python_SOURCE_DIR}/patches")
+set(python_patches_dir "${Python_SOURCE_DIR}/patches/python")
 
-function(_apply_patches _subdir)
-  if(NOT EXISTS ${patches_dir}/${_subdir})
-    message(STATUS "Skipping patches: Directory '${patches_dir}/${_subdir}' does not exist")
+function(_apply_python_patches _subdir)
+  if(NOT EXISTS ${python_patches_dir}/${_subdir})
+    message(STATUS "Skipping patches: Directory '${python_patches_dir}/${_subdir}' does not exist")
     return()
   endif()
-  file(GLOB _patches RELATIVE ${patches_dir} "${patches_dir}/${_subdir}/*.patch")
+  file(GLOB _patches RELATIVE ${python_patches_dir} "${python_patches_dir}/${_subdir}/*.patch")
   if(NOT _patches)
     return()
   endif()
@@ -68,7 +68,7 @@ function(_apply_patches _subdir)
       continue()
     endif()
     execute_process(
-      COMMAND ${PATCH_COMMAND} ${patches_dir}/${patch}
+      COMMAND ${PATCH_COMMAND} ${python_patches_dir}/${patch}
       WORKING_DIRECTORY ${SRC_DIR}
       RESULT_VARIABLE result
       ERROR_VARIABLE error
@@ -109,10 +109,10 @@ if("${PY_VERSION}" VERSION_LESS "3.0")
 endif()
 
 # Apply patches
-_apply_patches("${PY_VERSION_MAJOR}.${PY_VERSION_MINOR}")
-_apply_patches("${_py_version}")
-_apply_patches("${_py_version}/${CMAKE_SYSTEM_NAME}")
-_apply_patches("${_py_version}/${CMAKE_SYSTEM_NAME}-${CMAKE_C_COMPILER_ID}")
+_apply_python_patches("${PY_VERSION_MAJOR}.${PY_VERSION_MINOR}")
+_apply_python_patches("${_py_version}")
+_apply_python_patches("${_py_version}/${CMAKE_SYSTEM_NAME}")
+_apply_python_patches("${_py_version}/${CMAKE_SYSTEM_NAME}-${CMAKE_C_COMPILER_ID}")
 set(_version ${CMAKE_C_COMPILER_VERSION})
 if(MSVC)
   set(_version ${MSVC_VERSION})
@@ -123,4 +123,4 @@ if(MSVC)
     set(_version ${MSVC_VERSION})
   endif()
 endif()
-_apply_patches("${_py_version}/${CMAKE_SYSTEM_NAME}-${CMAKE_C_COMPILER_ID}/${_version}")
+_apply_python_patches("${_py_version}/${CMAKE_SYSTEM_NAME}-${CMAKE_C_COMPILER_ID}/${_version}")

@@ -1,0 +1,22 @@
+--- a/numpy/core/include/numpy/npy_common.h	2024-02-05 22:17:48.000000000 +0100
++++ b/numpy/core/include/numpy/npy_common.h	2024-05-03 12:39:14.097751800 +0200
+@@ -140,7 +140,7 @@
+ /* 64 bit file position support, also on win-amd64. Issue gh-2256 */
+ #if defined(_MSC_VER) && defined(_WIN64) && (_MSC_VER > 1400) || \
+     defined(__MINGW32__) || defined(__MINGW64__)
+-    #include <io.h>
++    #include <../ucrt/io.h>
+ 
+     #define npy_fseek _fseeki64
+     #define npy_ftell _ftelli64
+--- a/numpy/core/src/common/numpyos.c 2024-02-05 22:17:48.000000000 +0100
++++ b/numpy/core/src/common/numpyos.c 2024-05-03 13:11:07.447447500 +0200
+@@ -786,7 +786,7 @@
+ 
+ #include <stdlib.h>
+ 
+-#if _MSC_VER >= 1900
++#if defined(_MSC_VER) && (_MSC_VER >= 1900) && defined(Py_ENABLE_SHARED)
+ /* npy3k_compat.h uses this function in the _Py_BEGIN/END_SUPPRESS_IPH
+  * macros. It does not need to be defined when building using MSVC
+  * earlier than 14.0 (_MSC_VER == 1900).

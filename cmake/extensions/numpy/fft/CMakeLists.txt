@@ -7,9 +7,7 @@ add_python_extension(_pocketfft_internal
     ${NUMPY_SRC_DIR}/numpy/core/include
     ${NUMPY_SRC_DIR}/numpy/core/src/common
   DEFINITIONS
-    HAVE_NPY_CONFIG_H
-    NPY_INTERNAL_BUILD
-    NPY_DISABLE_OPTIMIZATION
+    ${_numpy_c_args_common}
 )
 
 # Install numpy fft files

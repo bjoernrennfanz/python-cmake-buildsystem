@@ -20,10 +20,7 @@ target_include_directories(npymath
 )
 
 target_compile_definitions(npymath
-  PUBLIC
-    HAVE_NPY_CONFIG_H
-    NPY_INTERNAL_BUILD
-    NPY_DISABLE_OPTIMIZATION
+  PUBLIC ${_numpy_c_args_common}
 )
 
 # Generate NumPy C API sources
@@ -217,9 +214,7 @@ add_python_extension(_multiarray_umath
     ${NUMPY_SRC_DIR}/numpy/core/src/npymath
     ${NUMPY_SRC_DIR}/numpy/core/src/umath
   DEFINITIONS
-    HAVE_NPY_CONFIG_H
-    NPY_INTERNAL_BUILD
-    NPY_DISABLE_OPTIMIZATION
+    ${_numpy_c_args_common}
   LIBRARIES
     $<TARGET_FILE:npymath>
 )
@@ -243,9 +238,7 @@ add_python_extension(_multiarray_tests
     ${NUMPY_SRC_DIR}/numpy/core/src/multiarray
     ${NUMPY_SRC_DIR}/numpy/core/src/npymath
   DEFINITIONS
-    HAVE_NPY_CONFIG_H
-    NPY_INTERNAL_BUILD
-    NPY_DISABLE_OPTIMIZATION
+    ${_numpy_c_args_common}
   LIBRARIES
     $<TARGET_FILE:npymath>
 )
@@ -266,9 +259,7 @@ add_python_extension(_umath_tests
     ${NUMPY_SRC_DIR}/numpy/core/src/multiarray
     ${NUMPY_SRC_DIR}/numpy/core/src/npymath
   DEFINITIONS
-    HAVE_NPY_CONFIG_H
-    NPY_INTERNAL_BUILD
-    NPY_DISABLE_OPTIMIZATION
+    ${_numpy_c_args_common}
 )
 
 add_python_extension(_rational_tests
@@ -282,9 +273,7 @@ add_python_extension(_rational_tests
     ${NUMPY_SRC_DIR}/numpy/core/src/multiarray
     ${NUMPY_SRC_DIR}/numpy/core/src/npymath
   DEFINITIONS
-    HAVE_NPY_CONFIG_H
-    NPY_INTERNAL_BUILD
-    NPY_DISABLE_OPTIMIZATION
+    ${_numpy_c_args_common}
 )
 
 add_python_extension(_struct_ufunc_tests
@@ -298,9 +287,7 @@ add_python_extension(_struct_ufunc_tests
     ${NUMPY_SRC_DIR}/numpy/core/src/multiarray
     ${NUMPY_SRC_DIR}/numpy/core/src/npymath
   DEFINITIONS
-    HAVE_NPY_CONFIG_H
-    NPY_INTERNAL_BUILD
-    NPY_DISABLE_OPTIMIZATION
+    ${_numpy_c_args_common}
 )
 
 add_python_extension(_operand_flag_tests
@@ -314,9 +301,7 @@ add_python_extension(_operand_flag_tests
     ${NUMPY_SRC_DIR}/numpy/core/src/multiarray
     ${NUMPY_SRC_DIR}/numpy/core/src/npymath
   DEFINITIONS
-    HAVE_NPY_CONFIG_H
-    NPY_INTERNAL_BUILD
-    NPY_DISABLE_OPTIMIZATION
+    ${_numpy_c_args_common}
 )
 
 # Build SIMD module
@@ -338,9 +323,7 @@ add_python_extension(_simd
     ${NUMPY_SRC_DIR}/numpy/core/src/_simd
     ${NUMPY_SRC_DIR}/numpy/core/src/npymath
   DEFINITIONS
-    HAVE_NPY_CONFIG_H
-    NPY_INTERNAL_BUILD
-    NPY_DISABLE_OPTIMIZATION
+    ${_numpy_c_args_common}
 )
 
 # Install numpy core files
