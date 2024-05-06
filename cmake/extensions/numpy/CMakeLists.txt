@@ -238,3 +238,4 @@ configure_file(${NUMPY_SRC_DIR}/numpy/__config__.py.in ${PROJECT_BINARY_DIR}/${P
 add_subdirectory(core)
 add_subdirectory(fft)
 add_subdirectory(linalg)
+add_subdirectory(random)

@@ -103,7 +103,7 @@ if(NOT DEFINED _download_numpy_${NUMPY_VERSION}_md5)
   message(WARNING "warning: selected numpy version '${NUMPY_VERSION}' is not tested. Tested versions `1.26.[1-4]`")
 endif()
 
-# We need an external python to build
+# We need an external python and cython to build
 if (DEFINED ENV{USEPYTHONVERSION_PYTHONLOCATION})
   # Find python used by Azure DevOps CI
   find_program(Python3_EXECUTABLE
@@ -116,6 +116,7 @@ if (DEFINED ENV{USEPYTHONVERSION_PYTHONLOCATION})
 else()
   find_package(Python3 COMPONENTS Interpreter)
 endif()
+find_package(Cython)
 
 # Generate source file for numpy builds
 function(numpy_generate_src GENERATED_SRC_FILES)
@@ -212,6 +213,111 @@ function(numpy_generate_using_script GENERATED_SRC_FILES)
 
   set(${GENERATED_SRC_FILES} ${_generated_files} PARENT_SCOPE)
 endfunction()
+
+function(numpy_generate_tempita GENERATED_FILES)
+  foreach(_current_file ${ARGN})
+    get_filename_component(_abs_file ${_current_file} ABSOLUTE)
+    get_filename_component(_generated_file ${_abs_file} NAME_WE)
+    get_filename_component(_generated_file_last_ext ${_abs_file} LAST_EXT)
+    get_filename_component(_generated_file_ext ${_abs_file} EXT)
+    string(REPLACE "${_generated_file_last_ext}" "" _generated_file_ext "${_generated_file_ext}")
+    get_source_file_property(output_location ${_abs_file} OUTPUT_LOCATION)
+    if(output_location)
+      file(MAKE_DIRECTORY "${output_location}")
+      set(_generated_file "${output_location}/${_generated_file}${_generated_file_ext}")
+    else()
+      set(_generated_file "${CMAKE_BINARY_DIR}/generated/numpy/${_generated_file}${_generated_file_ext}")
+    endif()
+    if(BUILD_LIBPYTHON_SHARED)
+      add_custom_command(OUTPUT ${_generated_file}
+              COMMAND "${Python3_EXECUTABLE}"
+              ARGS ${NUMPY_SRC_DIR}/numpy/_build_utils/tempita.py ${_abs_file} -o ${_generated_file}
+              DEPENDS ${_abs_file} VERBATIM
+      )
+    else()
+      file(RELATIVE_PATH _generated_file_rel ${CMAKE_BINARY_DIR} ${_generated_file})
+      message(STATUS "NumPy: Generate ${_generated_file_rel}")
+      execute_process(
+              COMMAND ${Python3_EXECUTABLE} ${NUMPY_SRC_DIR}/numpy/_build_utils/tempita.py ${_abs_file} -o ${_generated_file}
+              RESULT_VARIABLE _numpy_generate_src_result
+      )
+      if (_numpy_generate_src_result)
+        message(ERROR "tempita.py failed with output: ${_numpy_generate_src_result}")
+      endif()
+    endif()
+    list(APPEND _generated_files ${_generated_file})
+  endforeach()
+  set(${GENERATED_FILES} ${_generated_files} PARENT_SCOPE)
+endfunction()
+
+function(numpy_generate_cython GENERATED_C_FILE)
+  set(options C CXX PY2 PY3)
+  set(oneValueArgs PYX_FILE MODULE_NAME)
+  set(multiValueArgs)
+  cmake_parse_arguments(NUMPY_GENERATE_CYTHON
+    "${options}"
+    "${oneValueArgs}"
+    "${multiValueArgs}"
+    ${ARGN}
+  )
+
+  # Check for unparsed arguments (unknown)
+  if(NUMPY_GENERATE_CYTHON_UNPARSED_ARGUMENTS)
+    message(FATAL_ERROR "numpy_generate_cython had unparsed arguments")
+  endif()
+
+  if(NUMPY_GENERATE_CYTHON_C)
+    set(_output_syntax "C")
+  endif()
+
+  if(NUMPY_GENERATE_CYTHON_CXX)
+    set(_output_syntax "CXX")
+  endif()
+
+  if(NUMPY_GENERATE_CYTHON_PY2)
+    set(_input_syntax "PY2")
+  endif()
+
+  if(NUMPY_GENERATE_CYTHON_PY3)
+    set(_input_syntax "PY3")
+  endif()
+
+
+
+    get_filename_component(_abs_file ${NUMPY_GENERATE_CYTHON_PYX_FILE} ABSOLUTE)
+    get_filename_component(_generated_file ${_abs_file} NAME_WE)
+    get_filename_component(_generated_file_last_ext ${_abs_file} LAST_EXT)
+    get_filename_component(_generated_file_ext ${_abs_file} EXT)
+    string(REPLACE "${_generated_file_last_ext}" "" _generated_file_ext "${_generated_file_ext}")
+    get_source_file_property(output_location ${_abs_file} OUTPUT_LOCATION)
+    if(output_location)
+      file(MAKE_DIRECTORY "${output_location}")
+      set(_generated_file "${output_location}/${_generated_file}${_generated_file_ext}")
+    else()
+      set(_generated_file "${CMAKE_BINARY_DIR}/generated/numpy/${_generated_file}${_generated_file_ext}")
+    endif()
+    if(BUILD_LIBPYTHON_SHARED)
+      add_custom_command(OUTPUT ${_generated_file}
+              COMMAND "${Python3_EXECUTABLE}"
+              ARGS ${NUMPY_SRC_DIR}/numpy/_build_utils/tempita.py ${_abs_file} -o ${_generated_file}
+              DEPENDS ${_abs_file} VERBATIM
+      )
+    else()
+      file(RELATIVE_PATH _generated_file_rel ${CMAKE_BINARY_DIR} ${_generated_file})
+      message(STATUS "NumPy: Generate ${_generated_file_rel}")
+      execute_process(
+              COMMAND ${Python3_EXECUTABLE} ${NUMPY_SRC_DIR}/numpy/_build_utils/tempita.py ${_abs_file} -o ${_generated_file}
+              RESULT_VARIABLE _numpy_generate_src_result
+      )
+      if (_numpy_generate_src_result)
+        message(ERROR "tempita.py failed with output: ${_numpy_generate_src_result}")
+      endif()
+    endif()
+
+  set(${GENERATED_C_FILE} ${_generated_file} PARENT_SCOPE)
+endfunction()
+
+
 
 set(numpy_patches_dir "${Python_SOURCE_DIR}/patches/numpy")
 
