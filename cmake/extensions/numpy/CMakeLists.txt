@@ -157,6 +157,8 @@ foreach(_numpy_python_source ${_numpy_python_sources})
   # Copy lib files to build tree
   file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/${PYTHONHOME}/numpy)
   file(COPY ${_numpy_python_source} DESTINATION ${PROJECT_BINARY_DIR}/${PYTHONHOME}/numpy)
+  # Copy lib files to generated build tree
+  file(COPY ${_numpy_python_source} DESTINATION ${CMAKE_BINARY_DIR}/generated/numpy)
   # Install
   install(FILES ${_numpy_python_source} DESTINATION ${PYTHONHOME}/numpy)
 endforeach()

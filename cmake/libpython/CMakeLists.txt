@@ -470,7 +470,9 @@ if(builtin_compile_definitions_without_py_limited_api)
 endif()
 if(NOT BUILD_LIBPYTHON_SHARED)
   target_compile_definitions(_freeze_importlib PUBLIC Py_NO_ENABLE_SHARED)
-  target_link_options(_freeze_importlib PRIVATE "/NODEFAULTLIB:python39.lib")
+  if (WIN32)
+    target_link_options(_freeze_importlib PRIVATE "/NODEFAULTLIB:python39.lib")
+  endif()
 endif()
 
 # Freeze modules

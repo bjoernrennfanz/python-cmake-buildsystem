@@ -1,0 +1,8 @@
+--- a/numpy/random/__init__.pxd
++++ b/numpy/random/__init__.pxd
+@@ -11,4 +11,4 @@
+ 
+     ctypedef bitgen bitgen_t
+ 
+-from numpy.random.bit_generator cimport BitGenerator, SeedSequence
++from bit_generator cimport BitGenerator, SeedSequence
