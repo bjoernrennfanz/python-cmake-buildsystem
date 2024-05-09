@@ -24,6 +24,44 @@ class CPythonOpenCVConan(ConanFile):
         "with_gdbm": False
     }
 
+    def configure(self):
+        self.options["opencv"].shared = False
+        self.options["opencv"].parallel = False
+        self.options["opencv"].freetype = False
+        self.options["opencv"].sfm = False
+        self.options["opencv"].with_ipp = False
+        self.options["opencv"].gapi = True
+        self.options["opencv"].with_jpeg = "libjpeg"
+        self.options["opencv"].with_png = True
+        self.options["opencv"].with_tiff = True
+        self.options["opencv"].with_jpeg2000 = "jasper"
+        self.options["opencv"].with_openexr = True
+        self.options["opencv"].with_eigen = True
+        self.options["opencv"].with_webp = True
+        self.options["opencv"].with_quirc = True
+        self.options["opencv"].with_cuda = False
+        self.options["opencv"].with_cublas = False
+        self.options["opencv"].with_cufft = False
+        self.options["opencv"].with_cudnn = False
+        self.options["opencv"].with_ffmpeg = False
+        self.options["opencv"].with_imgcodec_hdr = False
+        self.options["opencv"].with_imgcodec_pfm = False
+        self.options["opencv"].with_imgcodec_pxm = False
+        self.options["opencv"].with_imgcodec_sunraster = False
+        self.options["opencv"].dnn = True
+        self.options["opencv"].dnn_cuda = False
+        self.options["opencv"].cuda_arch_bin = None
+        self.options["opencv"].cpu_baseline = None
+        self.options["opencv"].cpu_dispatch = None
+        self.options["opencv"].nonfree = False
+        self.options["opencv"].with_tesseract = False
+        if self.settings.os == "Macos":
+            self.options["opencv"].fPIC = True
+        elif self.settings.os == "Linux":
+            self.options["opencv"].fPIC = True
+            self.options["opencv"].with_gtk = False
+            self.options["opencv"].with_v4l = False
+            
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_LIBPYTHON_SHARED"] = self.options.shared
@@ -37,7 +75,16 @@ class CPythonOpenCVConan(ConanFile):
         tc.generate()
 
     def requirements(self):
-        self.requires("zlib/1.2.13")
+        # Requirements overrides for compatibility
+        self.requires("zlib/1.2.13", override=True)
+        self.requires("libpng/1.6.39", override=True)
+
+        # Linux specific overrides for compatibility
+        if self.settings.os == "Linux":
+            self.requires("xkbcommon/1.5.0", override=True)
+            self.requires("wayland/1.21.0", override=True)
+
+        # Python requirements
         self.requires("openssl/1.1.1t")
         self.requires("expat/2.5.0")
         self.requires("xz_utils/5.4.5")
@@ -48,3 +95,6 @@ class CPythonOpenCVConan(ConanFile):
         self.requires("sqlite3/3.36.0")
         if self.options.with_gdbm:
             self.requires("gdbm/1.19")
+
+        # Python OpenCV requirements
+        self.requires("opencv/4.8.1")
