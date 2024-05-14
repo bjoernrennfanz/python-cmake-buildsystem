@@ -6,7 +6,7 @@ if(NOT (NUMPY_SRC_DIR AND EXISTS ${NUMPY_SRC_DIR}/${_landmark_numpy}))
         ${CMAKE_CURRENT_SOURCE_DIR}/numpy-${NUMPY_VERSION}
         ${CMAKE_CURRENT_BINARY_DIR}/../numpy-${NUMPY_VERSION})
         set(NUMPY_SRC_DIR ${dirname})
-        if(EXISTS ${SRC_DIR}/${_landmark_numpy})
+        if(EXISTS ${NUMPY_SRC_DIR}/${_landmark_numpy})
             break()
         endif()
     endforeach()
@@ -142,13 +142,15 @@ function(numpy_generate_src GENERATED_SRC_FILES)
       )
     else()
       file(RELATIVE_PATH _generated_file_rel ${CMAKE_BINARY_DIR} ${_generated_file})
-      message(STATUS "NumPy - process_src_template.py: Generate ${_generated_file_rel}")
-      execute_process(
-        COMMAND ${Python3_EXECUTABLE} ${NUMPY_SRC_DIR}/numpy/_build_utils/process_src_template.py ${_abs_file} -o ${_generated_file}
-        RESULT_VARIABLE _numpy_generate_src_result
-      )
-      if (_numpy_generate_src_result)
-        message(ERROR "process_src_template.py failed with output: ${_numpy_generate_src_result}")
+      if(NOT EXISTS ${_generated_file})
+        message(STATUS "NumPy - process_src_template.py: Generate ${_generated_file_rel}")
+        execute_process(
+          COMMAND ${Python3_EXECUTABLE} ${NUMPY_SRC_DIR}/numpy/_build_utils/process_src_template.py ${_abs_file} -o ${_generated_file}
+          RESULT_VARIABLE _numpy_generate_src_result
+        )
+        if (_numpy_generate_src_result)
+          message(ERROR "process_src_template.py failed with output: ${_numpy_generate_src_result}")
+        endif()
       endif()
     endif()
     list(APPEND _generated_files ${_generated_file})
@@ -200,17 +202,23 @@ function(numpy_generate_using_script GENERATED_SRC_FILES)
       VERBATIM
     )
   else()
+    set(_skip_file_generation TRUE)
     foreach(_generated_file ${_generated_files})
-      file(RELATIVE_PATH _generated_file_rel ${CMAKE_BINARY_DIR} ${_generated_file})
-      message(STATUS "NumPy - ${NUMPY_GENERATE_SCRIPT_SCRIPT_NAME}: Generate ${_generated_file_rel}")
+      if(NOT EXISTS ${_generated_file})
+        file(RELATIVE_PATH _generated_file_rel ${CMAKE_BINARY_DIR} ${_generated_file})
+        message(STATUS "NumPy - ${NUMPY_GENERATE_SCRIPT_SCRIPT_NAME}: Generate ${_generated_file_rel}")
+        set(_skip_file_generation FALSE)
+      endif()
     endforeach()
-    execute_process(
-      COMMAND ${Python3_EXECUTABLE} ${NUMPY_GENERATE_SCRIPT_SCRIPT} -o ${_generated_output} ${NUMPY_GENERATE_SCRIPT_EXTRA_ARGS}
-      RESULT_VARIABLE _numpy_generate_src_result
-    )
-    if (_numpy_generate_src_result)
-      get_filename_component(_numpy_generate_script ${NUMPY_GENERATE_SCRIPT_SCRIPT} NAME)
-      message(ERROR "${_numpy_generate_script} failed with output: ${_numpy_generate_src_result}")
+    if (NOT ${_skip_file_generation})
+      execute_process(
+        COMMAND ${Python3_EXECUTABLE} ${NUMPY_GENERATE_SCRIPT_SCRIPT} -o ${_generated_output} ${NUMPY_GENERATE_SCRIPT_EXTRA_ARGS}
+        RESULT_VARIABLE _numpy_generate_src_result
+      )
+      if (_numpy_generate_src_result)
+        get_filename_component(_numpy_generate_script ${NUMPY_GENERATE_SCRIPT_SCRIPT} NAME)
+        message(ERROR "${_numpy_generate_script} failed with output: ${_numpy_generate_src_result}")
+      endif()
     endif()
   endif()
 
@@ -240,13 +248,15 @@ function(numpy_generate_tempita GENERATED_FILES)
       )
     else()
       file(RELATIVE_PATH _generated_file_rel ${CMAKE_BINARY_DIR} ${_generated_file})
-      message(STATUS "NumPy - tempita.py: Generate ${_generated_file_rel}")
-      execute_process(
-        COMMAND ${Python3_EXECUTABLE} ${NUMPY_SRC_DIR}/numpy/_build_utils/tempita.py ${_abs_file} -o ${_generated_file}
-        RESULT_VARIABLE _numpy_generate_src_result
-      )
-      if (_numpy_generate_src_result)
-        message(ERROR "tempita.py failed with output: ${_numpy_generate_src_result}")
+      if(NOT EXISTS ${_generated_file})
+        message(STATUS "NumPy - tempita.py: Generate ${_generated_file_rel}")
+        execute_process(
+          COMMAND ${Python3_EXECUTABLE} ${NUMPY_SRC_DIR}/numpy/_build_utils/tempita.py ${_abs_file} -o ${_generated_file}
+          RESULT_VARIABLE _numpy_generate_src_result
+        )
+        if (_numpy_generate_src_result)
+          message(ERROR "tempita.py failed with output: ${_numpy_generate_src_result}")
+        endif()
       endif()
     endif()
     list(APPEND _generated_files ${_generated_file})
@@ -471,13 +481,15 @@ function(numpy_generate_cython GENERATED_C_FILE)
       COMMENT ${comment}
     )
   else()
-    message(STATUS "${comment}")
-    execute_process(
-      COMMAND ${CYTHON_EXECUTABLE} ${cxx_arg} ${include_directory_arg} ${py_version_arg} ${pyx_location} --cleanup 5 --output-file ${_generated_file}
-      RESULT_VARIABLE _numpy_generate_cython_result
-    )
-    if (_numpy_generate_cython_result)
-      message(ERROR "cython failed with output: ${_numpy_generate_src_result}")
+    if(NOT EXISTS ${_generated_file})
+      message(STATUS "${comment}")
+      execute_process(
+        COMMAND ${CYTHON_EXECUTABLE} ${cxx_arg} ${include_directory_arg} ${py_version_arg} ${pyx_location} --cleanup 5 --output-file ${_generated_file}
+        RESULT_VARIABLE _numpy_generate_cython_result
+      )
+      if (_numpy_generate_cython_result)
+        message(ERROR "cython failed with output: ${_numpy_generate_src_result}")
+      endif()
     endif()
   endif()
 

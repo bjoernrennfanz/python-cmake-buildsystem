@@ -19,6 +19,12 @@ else()
       set(_BUILD "BUILD;missing")
     endif()
 
+    # Let Release with Debug Info configuration use Release packages
+    if(${CMAKE_BUILD_TYPE} MATCHES "RelWithDebInfo")
+      list(FILTER settings EXCLUDE REGEX "^build_type=.*")
+      list(APPEND settings "build_type=Release")
+    endif()
+
     conan_cmake_install(
       UPDATE
       PATH_OR_REFERENCE ${CMAKE_SOURCE_DIR}

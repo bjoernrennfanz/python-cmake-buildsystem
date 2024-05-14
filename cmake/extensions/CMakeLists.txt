@@ -823,3 +823,7 @@ endif()
 if(NUMPY_SRC_DIR)
     add_subdirectory(numpy)
 endif()
+
+if(OPENCV_SRC_DIR)
+    add_subdirectory(opencv)
+endif()
